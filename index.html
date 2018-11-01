@@ -1,24 +1,11 @@
 <html>
-
-<body>
-    <canvas width=1400 height=900 id="canvas" style="border: 1px solid black"></canvas>
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        window.ctx = ctx;
-        ctx.fillStyle = "red";
-        ctx.fillRect(400, 200, 720, 800);
+    <head>
         
-          ctx.beginPath();
-            ctx.arc(100, 100, 20, 0, 2 * Math.PI, true);
-            ctx.strokeStyle = "green";
-            ctx.lineWidth = 5;
-            ctx.stroke();
-            ctx.fillStyle = "blue";
-            ctx.fill();
-    </script>
-</body>
+    </head>
+    <body>
+        <script type="application/javascript" src="./bundle.js"></script>
+        <canvas width=1300 height=700 id="canvas", style="border: 1px solid black"></canvas>
+    </body>
 
 </html>
 
-    <!-- <script type="application/javascript" src="vendor/keymaster.js"></script>
