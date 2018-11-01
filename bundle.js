@@ -107,7 +107,7 @@ class Bubble {
         this.radius = options.radius;
         this.color = options.color;
         this.vx = 1.5;
-        this.vy = 8.5;
+        this.vy = options.vy || 8.5;
         this.bounceFactor = 1;
         this.gravity = 0.12;
     }
@@ -139,8 +139,6 @@ class Bubble {
             this.vy = 8.5;
         }
     }
-
-    //needs to bounce
 
     //if it gets hit by the wire it splits into two new ones, going opposite directions
 
@@ -195,58 +193,56 @@ class Character {
         this.posX = options.x;
         this.posY = options.y;
         this.width = 30
-        this.vx = 3;
+        this.speed = 3;
+        this.left = false;
+        this.right = false;
     }
 
     draw(ctx){
+        if (this.left) this.posX -= this.speed;
+        if (this.right) this.posX += this.speed;
         ctx.fillStyle = "black";
         ctx.fillRect(this.posX, this.posY, 30, 50);
     }
 
 
 
-    move(dir, delta){
-        // console.log(delta)
-        const velocityScale = delta / NORMAL_FRAME_TIME_DELTA;
-        // console.log(velocityScale);
-        const offsetX = this.vx * velocityScale;
-        // console.log(offsetX);
+    // move(dir, delta){
+    //     // console.log(delta)
+    //     const velocityScale = delta / NORMAL_FRAME_TIME_DELTA;
+    //     // console.log(velocityScale);
+    //     const offsetX = this.vx * velocityScale;
+    //     // console.log(offsetX);
         
-        if (dir === "left"){
-            this.posX += ((this.vx + offsetX)*(-1));
-        }
+    //     if (dir === "left"){
+    //         this.posX += ((this.vx + offsetX)*(-1));
+    //     }
      
-        if (dir === "right"){
-            this.posX += (this.vx + offsetX);
-        }
-    }
+    //     if (dir === "right"){
+    //         this.posX += (this.vx + offsetX);
+    //     }
+    // }
 
     isCollidedWith(obj){
         //checks for colission with the top of the player
         if ((obj.posY + obj.radius) >= this.posY && obj.posX >= this.posX && obj.posX <= this.posX + this.width){
-      
-                 console.log("TOP COLLISION")
-            console.log(obj.posY + obj.radius >= this.posY, obj.posX >= this.posX, obj.posX <= this.posX + this.width);
+       
              }
         //checks for collision with the right of the player
         if (obj.posX + obj.radius >= this.posX && obj.posX + obj.radius <= this.posX + this.width && obj.posY >= this.posY) {
-
-            console.log("RIGHT COLLISION")
+        
         }
+        //checks for collision with the left of the player
         if (obj.posX - obj.radius >= this.posX && obj.posX - obj.radius <= this.posX + this.width && obj.posY >= this.posY) {
-
-            console.log("LEFT COLLISION");
+      
         }
-    
-
-
     }
 
 
 }
 
 
-const NORMAL_FRAME_TIME_DELTA = 1000/60;
+const NORMAL_FRAME_TIME_DELTA = 700/60;
 
 module.exports = Character;
 
@@ -261,11 +257,21 @@ module.exports = Character;
 
 const Bubble = __webpack_require__(/*! ./bubble */ "./lib/bubble.js");
 const Character = __webpack_require__(/*! ./character */ "./lib/character.js");
+const Wire = __webpack_require__(/*! ./wire */ "./lib/wire.js");
+
+const BUBBLES = { 
+                    70: { color: "red", radius: 70 },
+                    40: {color: "orange", radius: 40},
+                    20: {color: "green", radius: 20},
+                    10: {color: "blue", radius: 10},
+                    5: { color: "yellow", radius: 5}
+}
 
 class Game{
     constructor(){
         this.bubbles = [];
         this.character = [];
+        this.wire = [];
         this.addBubbles();
     }
 
@@ -279,8 +285,17 @@ class Game{
         this.character.push(new Character(options));
     }
 
+    addWire(){
+        debugger
+        if (this.wire.length === 0){
+            let pos = [this.character[0].posX+15, this.character[0].posY+50];
+            this.wire.push(new Wire(pos))
+        }
+        // debugger;
+    }
+
     allObjects(){
-        return [].concat(this.bubbles, this.character);
+        return [].concat(this.bubbles, this.character, this.wire);
     }
 
     draw(ctx){  
@@ -293,7 +308,25 @@ class Game{
     checkCollisions(){
         this.bubbles.forEach( bubble => {
             this.character[0].isCollidedWith(bubble);
+            if (this.wire.length != 0 && this.wire[0].isCollidedWith(bubble)){
+                this.wire = [];
+           
+            }
         })
+        
+    }
+
+    hitBubble(bubble){
+        bubbleIdx = this.bubbles.indexOf(bubble)
+        if (bubble.radius === 70){
+            // let newBub1 = merge(BUBBLES.35, )
+
+        }
+        else if (bubble.radius != 5) {
+            let newBub1 = new Bubble
+
+        }
+        this.bubbles.splice(bubbleIdx)
     }
 
     step(){
@@ -324,27 +357,33 @@ class GameView {
         this.ctx = ctx;
         this.game.addCharacter();
         this.character = this.game.character[0];
+        this.wire = this.game.wire[0];
     }
 
     
-    move(e) {
+    move(down, e) {
         // debugger;
         switch (e.keyCode) {
             case 37:
                 // debugger;
-                // this.character.left = !(this.character.left);
-                this.character.move("left", this.timeDelta);
+                this.character.left = down;
+                // this.character.move("left", this.timeDelta);
                 break;
             case 39:
             // debugger;
-                // this.character.right = !(this.character.right);
-                this.character.move("right", this.timeDelta);
+                this.character.right = down
+                // this.character.move("right", this.timeDelta);
+                break;
+            case 32:
+                // debugger;w
+                this.game.addWire();
                 break;
         }
     }
     
     start(){
-        addEventListener("keydown", this.move.bind(this), false);
+        addEventListener("keydown", this.move.bind(this, true), false);
+        addEventListener("keyup", this.move.bind(this, false), false);
     
         // this.game.draw(this.ctx);
         this.lastTime = 0;
@@ -365,6 +404,72 @@ class GameView {
 }
 
 module.exports = GameView;
+
+/***/ }),
+
+/***/ "./lib/wire.js":
+/*!*********************!*\
+  !*** ./lib/wire.js ***!
+  \*********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+class Wire {
+    constructor(pos){
+        this.startPos = pos;
+        this.endPos = [this.startPos[0], this.startPos[1] - 50];
+        this.vy = -3
+    }
+
+
+
+    draw(ctx){
+        // debugger;
+        ctx.beginPath();
+        ctx.moveTo(this.startPos[0], this.startPos[1]);
+        ctx.lineTo(this.endPos[0], this.endPos[1])
+        ctx.stroke();
+        this.update();
+    }
+
+    update(){
+        this.endPos[1] += this.vy
+    }
+    //needs to disappear
+        //when it hits the ceiling
+
+        //when it hits a balloon
+
+    isCollidedWith(bubble){
+        const bcx = bubble.posX;
+        const bcy = bubble.posY;
+        const wex = this.endPos[0];
+        const wey = this.endPos[1];
+        // if this.startPos[0]
+        if (this.endPos[1] <= 100){
+            // this.remove();
+            return true;
+        }
+        if (Math.sqrt((bcx - wex)**2 + (bcy - wey)**2) <= bubble.radius){
+            return true;
+        }
+
+        if (bcy + bubble.radius - 5 > wey && wex >= bcx - bubble.radius && wex <= bcx + bubble.radius){
+            return true;
+        }
+
+    }
+
+    // remove(){
+    //     this.startPos = [0,0];
+    //     this.endPos = [0,0];
+    // }
+}
+
+module.exports = Wire;
+
+
 
 /***/ })
 
