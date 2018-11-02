@@ -95,21 +95,20 @@
 
 
 
-const DEFAULTS = {
-    RADIUS: 80,
-    COLOR: "purple",
-}
 
 class Bubble {
-    constructor(options = DEFAULTS) {
+    constructor(options) {
         this.posX = options.x;
         this.posY = options.y;
         this.radius = options.radius;
         this.color = options.color;
-        this.vx = 1.5;
-        this.vy = options.vy || 8.5;
+        this.startingVy = options.startVy;
+        this.defaultVy = options.vy;
+        this.vx = options.vx || 1.5;
+        this.vy = options.vy;
         this.bounceFactor = 1;
-        this.gravity = 0.12;
+        this.gravity = options.gravity || 0.12;
+        this.count = 0
     }
 
     draw(ctx){
@@ -122,21 +121,36 @@ class Bubble {
     }
 
     update(){
-      
-        this.posX += this.vx;
-        this.posY += this.vy;
-        this.vy += this.gravity;
-        if (this.posY >= 530){
-            this.vy = -8.5;
+    
+        if (this.count === 0 && this.startingVy){
+        //    debugger;
+            this.posY += this.startingVy
+            this.startingVy += this.gravity
+        } else {
+            // debugger;
+            this.posY += this.vy;
+            this.vy += this.gravity;
         }
-        if (this.posX <= 170){
+    
+        // this.vy ? this.posY += this.vy : ;
+        // this.vy ? this.vy += this.gravity : ;
+        this.posX += this.vx;
+        // this.posY += this.vy
+        if (this.posY >= 600-this.radius){
+            this.count = 1;
+            // debugger;
+            this.vy = this.defaultVy*(-1);
+            // debugger;
+            // this.vy = -8.5;
+        }
+        if (this.posX <= 100+this.radius){
             this.vx = 1.5;
         }
-        if (this.posX >= 930){
+        if (this.posX >= 1000-this.radius){
             this.vx = -1.5;
         }
         if (this.posY <= 100){
-            this.vy = 8.5;
+            this.vy = this.defaultVy;
         }
     }
 
@@ -164,12 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvasEl = document.getElementById("canvas");
 
     const ctx = canvasEl.getContext('2d');
-    
-
-    // ctx.beginPath();
-    // ctx.arc(100, 100, 20, 0, 2 * Math.PI, true);
-    // ctx.fillStyle = "blue";
-    // ctx.fill();
 
     const game = new Game();
     new GameView(game, ctx).start();
@@ -192,8 +200,8 @@ class Character {
     constructor(options){
         this.posX = options.x;
         this.posY = options.y;
-        this.width = 30
-        this.speed = 3;
+        this.width = 30;
+        this.speed = 2.4;
         this.left = false;
         this.right = false;
     }
@@ -202,39 +210,33 @@ class Character {
         if (this.left) this.posX -= this.speed;
         if (this.right) this.posX += this.speed;
         ctx.fillStyle = "black";
-        ctx.fillRect(this.posX, this.posY, 30, 50);
+        ctx.fillRect(this.posX, this.posY, this.width, 50);
     }
 
-
-
-    // move(dir, delta){
-    //     // console.log(delta)
-    //     const velocityScale = delta / NORMAL_FRAME_TIME_DELTA;
-    //     // console.log(velocityScale);
-    //     const offsetX = this.vx * velocityScale;
-    //     // console.log(offsetX);
-        
-    //     if (dir === "left"){
-    //         this.posX += ((this.vx + offsetX)*(-1));
-    //     }
-     
-    //     if (dir === "right"){
-    //         this.posX += (this.vx + offsetX);
-    //     }
-    // }
-
     isCollidedWith(obj){
+        const rad = obj.radius - 3;
+        const bcx = obj.posX;
+        const bcy = obj.posY;
+        const rx = this.posX;
+        const ry = this.posY;
+        const lx = this.posX + this.width;
+        const ly = this.posY;
+
         //checks for colission with the top of the player
         if ((obj.posY + obj.radius) >= this.posY && obj.posX >= this.posX && obj.posX <= this.posX + this.width){
        
              }
         //checks for collision with the right of the player
         if (obj.posX + obj.radius >= this.posX && obj.posX + obj.radius <= this.posX + this.width && obj.posY >= this.posY) {
-        
+    
         }
         //checks for collision with the left of the player
         if (obj.posX - obj.radius >= this.posX && obj.posX - obj.radius <= this.posX + this.width && obj.posY >= this.posY) {
-      
+     
+        }
+        // console.log(Math.sqrt((bcx - rx) ** 2 + (bcy - ry) ** 2), rad);
+        if ((Math.sqrt((bcx - rx) ** 2 + (bcy - ry) ** 2) <= rad) || (Math.sqrt((bcx - lx) ** 2 + (bcy - ly) ** 2) <= rad)){
+            // debugger;
         }
     }
 
@@ -242,7 +244,7 @@ class Character {
 }
 
 
-const NORMAL_FRAME_TIME_DELTA = 700/60;
+// const NORMAL_FRAME_TIME_DELTA = 700/60;
 
 module.exports = Character;
 
@@ -258,14 +260,18 @@ module.exports = Character;
 const Bubble = __webpack_require__(/*! ./bubble */ "./lib/bubble.js");
 const Character = __webpack_require__(/*! ./character */ "./lib/character.js");
 const Wire = __webpack_require__(/*! ./wire */ "./lib/wire.js");
+const Timer = __webpack_require__(/*! ./timer */ "./lib/timer.js");
 
 const BUBBLES = { 
-                    70: { color: "red", radius: 70 },
-                    40: {color: "orange", radius: 40},
-                    20: {color: "green", radius: 20},
-                    10: {color: "blue", radius: 10},
-                    5: { color: "yellow", radius: 5}
-}
+                    70: { color: "red", radius: 70, vx: 1.5, vy: 8.5, gravity: .12},
+                    40: { color: "orange", radius: 40, vx: 1.5, vy: 7.8, gravity: .12, startVy: -4},
+                    20: { color: "green", radius: 20, vx: 1.5, vy: 6.8, gravity: .12, startVy: -4},
+                    10: { color: "blue", radius: 10, vx: 1.5, vy: 5.4, gravity: .12, startVy: -5.5},
+                    5: { color: "yellow", radius: 5, vx: 1.5, vy: 4, gravity: .12, startVy: -6.3}
+};
+
+const DEFAULT = { x: 400, y: 300, color: "red", radius: 70, vy: 8.5 };
+
 
 class Game{
     constructor(){
@@ -273,66 +279,99 @@ class Game{
         this.character = [];
         this.wire = [];
         this.addBubbles();
+        this.timer = [];
+        this.startTimer();
     }
 
-    addBubbles(){
-        let options = {x: 400, y: 300, color: "red", radius: 70}
+    startTimer(){
+        this.timer.push(new Timer);
+    }
+    
+    addBubbles(options = DEFAULT){
         this.bubbles.push(new Bubble(options))
     }
-
+    
     addCharacter(){
         let options = {x: 550, y: 550}
         this.character.push(new Character(options));
     }
-
+    
     addWire(){
-        debugger
         if (this.wire.length === 0){
             let pos = [this.character[0].posX+15, this.character[0].posY+50];
             this.wire.push(new Wire(pos))
         }
-        // debugger;
     }
-
+    
     allObjects(){
-        return [].concat(this.bubbles, this.character, this.wire);
+        return [].concat(this.bubbles, this.character, this.wire, this.timer);
     }
-
-    draw(ctx){  
+    
+    draw(ctx){ 
         ctx.clearRect(0,0,1300,700);
         ctx.fillStyle = "lightblue";
         ctx.fillRect(100, 100, 900, 500);
-        this.allObjects().forEach(object => object.draw(ctx))
-    }
+        this.allObjects().forEach(object => {
+            console.log(object);
+            object.draw(ctx)
+        })
 
+    }
+    
     checkCollisions(){
+        this.wire.forEach( wire => {
+            if (wire.endPos[1] <= 100){
+                this.wire = [];
+            }
+        })
         this.bubbles.forEach( bubble => {
             this.character[0].isCollidedWith(bubble);
+            
             if (this.wire.length != 0 && this.wire[0].isCollidedWith(bubble)){
                 this.wire = [];
-           
+                this.hitBubble(bubble);
             }
         })
         
     }
-
+    
     hitBubble(bubble){
-        bubbleIdx = this.bubbles.indexOf(bubble)
+        let bubbleIdx = this.bubbles.indexOf(bubble);
+        const posX = bubble.posX;
+        const posY = bubble.posY;
+        const newVx = bubble.vx;
+   
         if (bubble.radius === 70){
-            // let newBub1 = merge(BUBBLES.35, )
+            let newBub1 = Object.assign(BUBBLES[40], {x: posX, y: posY, vx: newVx})
+            this.addBubbles(newBub1);
 
+            let newBub2 = Object.assign(BUBBLES[40], { x: posX, y: posY, vx: newVx * (-1)})
+            this.addBubbles(newBub2);
         }
         else if (bubble.radius != 5) {
-            let newBub1 = new Bubble
+            let id = bubble.radius / 2;
+            let newBub1 = Object.assign(BUBBLES[id], {
+                x: posX,
+                y: posY,
+                vx: newVx
+            });
+            this.addBubbles(newBub1);
 
+            let newBub2 = Object.assign(BUBBLES[id], {
+                x: posX,
+                y: posY,
+                vx: newVx * -1
+            });
+            this.addBubbles(newBub2); 
         }
-        this.bubbles.splice(bubbleIdx)
-    }
 
+        this.bubbles.splice(bubbleIdx,1)
+    }
+    
     step(){
         this.checkCollisions();
     }
-
+    
 }
 
 module.exports = Game;
@@ -356,26 +395,21 @@ class GameView {
         this.game = game;
         this.ctx = ctx;
         this.game.addCharacter();
+        // this.game.startTimer();
         this.character = this.game.character[0];
         this.wire = this.game.wire[0];
     }
 
     
     move(down, e) {
-        // debugger;
         switch (e.keyCode) {
             case 37:
-                // debugger;
                 this.character.left = down;
-                // this.character.move("left", this.timeDelta);
                 break;
             case 39:
-            // debugger;
                 this.character.right = down
-                // this.character.move("right", this.timeDelta);
                 break;
             case 32:
-                // debugger;w
                 this.game.addWire();
                 break;
         }
@@ -384,10 +418,8 @@ class GameView {
     start(){
         addEventListener("keydown", this.move.bind(this, true), false);
         addEventListener("keyup", this.move.bind(this, false), false);
-    
-        // this.game.draw(this.ctx);
+        
         this.lastTime = 0;
-        //start aimation
         requestAnimationFrame(this.animate.bind(this));
     }
 
@@ -398,12 +430,50 @@ class GameView {
      this.game.draw(this.ctx);
      this.lastTime = time;
 
-     //every call to animate requests causes another call to animate
      requestAnimationFrame(this.animate.bind(this))
     }
 }
 
 module.exports = GameView;
+
+/***/ }),
+
+/***/ "./lib/timer.js":
+/*!**********************!*\
+  !*** ./lib/timer.js ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+class Timer {
+    constructor(){
+        this.timer = 0
+        this.on = true;
+    }
+
+    draw(ctx){
+        if (this.timer >= 1) {
+            this.on = false;
+        }
+        if (this.on){
+            // debugger;
+            this.timer += .0005
+        }
+        ctx.fillStyle = "red";
+        ctx.fillRect(1050, 600, 50, 0-(500*this.timer));
+    }
+
+    timeOut(){
+        if (this.timer >= 1){
+            this.on = false;
+            return true
+        }
+        return false
+    }
+}
+
+module.exports = Timer;
 
 /***/ }),
 
@@ -419,7 +489,7 @@ class Wire {
     constructor(pos){
         this.startPos = pos;
         this.endPos = [this.startPos[0], this.startPos[1] - 50];
-        this.vy = -3
+        this.vy = -4
     }
 
 
@@ -436,35 +506,22 @@ class Wire {
     update(){
         this.endPos[1] += this.vy
     }
-    //needs to disappear
-        //when it hits the ceiling
-
-        //when it hits a balloon
 
     isCollidedWith(bubble){
         const bcx = bubble.posX;
         const bcy = bubble.posY;
         const wex = this.endPos[0];
         const wey = this.endPos[1];
-        // if this.startPos[0]
-        if (this.endPos[1] <= 100){
-            // this.remove();
+        const rad = bubble.radius
+       
+       
+        if (Math.sqrt((bcx - wex)**2 + (bcy - wey)**2) <= rad){
             return true;
         }
-        if (Math.sqrt((bcx - wex)**2 + (bcy - wey)**2) <= bubble.radius){
+        if (bcy + rad - 5 > wey && wex >= bcx - rad && wex <= bcx + rad) {
             return true;
         }
-
-        if (bcy + bubble.radius - 5 > wey && wex >= bcx - bubble.radius && wex <= bcx + bubble.radius){
-            return true;
-        }
-
     }
-
-    // remove(){
-    //     this.startPos = [0,0];
-    //     this.endPos = [0,0];
-    // }
 }
 
 module.exports = Wire;
