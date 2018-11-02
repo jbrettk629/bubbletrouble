@@ -1,0 +1,23 @@
+body {
+    background-image: url("/Users/josephkalbacher/Desktop/jsproject/app/assets/stonewall.jpeg");
+}
+
+.game-name {
+    font-family: Bath Time Regular;
+}
+
+.main-content{
+    display: flex;
+    /* border: 1px solid red; */
+}
+
+.instructions {
+    width:300px;
+    height: 500px;
+    float: left;
+    border: 1px solid red;
+}
+
+canvas {
+    float: left;
+}
