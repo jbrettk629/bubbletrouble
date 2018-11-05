@@ -110,9 +110,14 @@ class Bubble {
         this.gravity = options.gravity || 0.12;
         this.count = 0
         this.points = options.points;
+        this.bonus = options.bonus
     }
 
     draw(ctx){
+        // let glareCenter = (this.radius/Math.sqrt(2))-3;
+        // var grd = ctx.createRadialGradient(this.posX - glareCenter, this.posY - glareCenter, 0.1, this.posX - glareCenter, this.posY - glareCenter, this.radius * 0.55);
+        // grd.addColorStop(0, "lightred");
+        // grd.addColorStop(1, this.color);
         ctx.beginPath();
         ctx.arc(this.posX, this.posY, this.radius, 0, 2 * Math.PI, true);
         ctx.fillStyle = this.color;
@@ -230,7 +235,7 @@ class Character {
             // this.loseLife();
             return true;
         }
-        // console.log(Math.sqrt((bcx - rx) ** 2 + (bcy - ry) ** 2), rad);
+        // checks for collision with the corners of the playerc
         if ((Math.sqrt((bcx - rx) ** 2 + (bcy - ry) ** 2) <= rad) || (Math.sqrt((bcx - lx) ** 2 + (bcy - ly) ** 2) <= rad)){
             // this.loseLife();
             return true;
@@ -242,9 +247,28 @@ class Character {
     }
 
     displayLives(ctx){
-        ctx.font = "30px Comic Sans MS";
-        ctx.fillStyle = "black";
-        ctx.fillText(`Lives: ${this.lives} `, 0, 550)
+
+        ctx.fillStyle = "lightgrey"
+        ctx.fillRect(0, 515, 80, 50);
+        ctx.fillStyle = "grey"
+        ctx.fillRect(3, 518, 74, 44);
+        ctx.fillStyle = "white"
+        ctx.fillRect(5, 520, 70, 40);
+
+        ctx.font = "bold 25px Comic Sans MS";
+        ctx.fillStyle = "red";
+        ctx.fillText('Lives', 10, 550)
+
+        ctx.fillStyle = "lightgrey";
+        ctx.fillRect(100, 515, 60, 50);
+        ctx.fillStyle = "grey";
+        ctx.fillRect(103, 518, 54, 44);
+        ctx.fillStyle = "white";
+        ctx.fillRect(105, 520, 50, 40);
+
+        ctx.font = "25px Comic Sans MS";
+        ctx.fillStyle = "grey";
+        ctx.fillText(`${this.lives}`, 120, 550);
     }
 
 
@@ -270,11 +294,11 @@ const Wire = __webpack_require__(/*! ./wire */ "./lib/wire.js");
 const Timer = __webpack_require__(/*! ./timer */ "./lib/timer.js");
 
 const BUBBLES = { 
-            70: { color: "red", radius: 70, vx: 1.5, vy: 8.5, gravity: .12, points: 10 },
-            40: { color: "orange", radius: 40, vx: 1.5, vy: 7.8, gravity: .12, startVy: -4, points: 15 },
-            20: { color: "green", radius: 20, vx: 1.5, vy: 6.8, gravity: .12, startVy: -4, points: 20 },
-            10: { color: "blue", radius: 10, vx: 1.5, vy: 5.4, gravity: .12, startVy: -5.5, points: 25 },
-            5: { color: "purple", radius: 5, vx: 1.5, vy: 4, gravity: .12, startVy: -6.3, points: 30 }
+            70: { color: "red", radius: 70, vx: 1.5, vy: 8.5, gravity: .12, points: 10, bonus: 0 },
+            40: { color: "orange", radius: 40, vx: 1.5, vy: 7.8, gravity: .12, startVy: -4, points: 15, bonus: 0 },
+            20: { color: "green", radius: 20, vx: 1.5, vy: 6.8, gravity: .12, startVy: -4, points: 20, bonus: 200 },
+            10: { color: "blue", radius: 10, vx: 1.5, vy: 5.4, gravity: .12, startVy: -5.5, points: 25, bonus: 100 },
+            5: { color: "purple", radius: 5, vx: 1.5, vy: 4, gravity: .12, startVy: -6.3, points: 30, bonus: 50 }
 };
 
 const DEFAULT = { x: 200, y: 200, color: "red", radius: 70, vx: 1.5, vy: 8.5, gravity: .12, points: 10 }
@@ -318,16 +342,40 @@ class Game{
     
     draw(ctx){
         ctx.clearRect(0,0,1000,600);
-        ctx.fillStyle = "lightgrey";
-        ctx.fillRect(0, 0, 805, 505);
-        ctx.fillStyle = "lightblue";
-        ctx.fillRect(5, 5, 795, 495);
+        this.drawborder(ctx);
+        this.drawBackground(ctx);
+        this.drawCeiling(ctx);
         this.allObjects().forEach(object => {
-            console.log(object);
             object.draw(ctx)
         })
         this.displayPoints(ctx);
+    }
+    
+    drawborder(ctx){
+        ctx.fillStyle = "lightgrey";
+        ctx.fillRect(0, 0, 805, 505);
+    }
 
+    drawBackground(ctx){
+        let grd = ctx.createLinearGradient(5, 5, 795, 495);
+        grd.addColorStop(0, '#ceefff');
+        grd.addColorStop(1, '#52bcff');
+
+        ctx.fillStyle = grd;
+        ctx.fillRect(5, 5, 795, 495);
+    }
+
+    drawCeiling(ctx){
+        let i = 0;
+        while (i <= 805){
+            ctx.beginPath();
+            ctx.moveTo(i,0);
+            ctx.lineTo(i+6,0);
+            ctx.lineTo(i+3,10)
+            ctx.fillStyle = "grey"
+            ctx.fill();
+            i += 6;
+        }
     }
 
     gameOver(){
@@ -335,7 +383,7 @@ class Game{
         // debugger;
         this.stopAnimation();
         if (this.character[0].lives > 0){
-            setTimeout(() => this.continueAnimation(), 2500);
+            setTimeout(() => this.continueAnimation(), 1000);
         }
     }
 
@@ -359,7 +407,7 @@ class Game{
         })
         this.bubbles.forEach( bubble => {
             if (bubble.posY-bubble.radius <= 5){
-                let points = bubble.points * 2
+                let points = bubble.bonus
           
                 this.addPoints(points);
                 this.removeBubble(bubble);
@@ -444,9 +492,30 @@ class Game{
         this.stopAnimation();
     }
     displayPoints(ctx){
-        ctx.font = "30px Comic Sans MS";
-        ctx.fillStyle = "black";
-        ctx.fillText (`Points: ${this.points} `, 200, 550)
+
+        ctx.fillStyle = "lightgrey"
+        ctx.fillRect(240, 515, 90, 50);
+        ctx.fillStyle = "grey"
+        ctx.fillRect(243, 518, 84, 44);
+        ctx.fillStyle = "white"
+        ctx.fillRect(245, 520, 80, 40);
+
+        ctx.font = "bold 25px Comic Sans MS";
+        ctx.fillStyle = "red";
+        ctx.fillText ('Points', 250, 550)
+
+        ctx.fillStyle = "lightgrey"
+        ctx.fillRect(350, 515, 90, 50);
+        ctx.fillStyle = "grey"
+        ctx.fillRect(353, 518, 84, 44);
+        ctx.fillStyle = "white"
+        ctx.fillRect(355, 520, 80, 40);
+
+        ctx.font = "25px Comic Sans MS";
+        ctx.fillStyle = "grey";
+        ctx.fillText(`${this.points}`, 375, 550)
+
+
     }
 
     
@@ -473,7 +542,6 @@ class GameView {
         this.game = game;
         this.ctx = ctx;
         this.game.addCharacter();
-        // this.game.startTimer();
         this.character = this.game.character[0];
         this.wire = this.game.wire[0];
         this.game.stopAnimation = this.stopAnimation.bind(this);
@@ -513,25 +581,18 @@ class GameView {
         ctx.font = "30px Comic Sans MS";
         ctx.fillStyle = "black";
         ctx.fillText("Get Ready", 325, 250)
-        // debugger;
-        setTimeout(() => this.startAnimation(), 5000)
+        setTimeout(() => this.startAnimation(), 3500)
     }
     
     startAnimation(){
-        // debugger;
         requestAnimationFrame(this.animate.bind(this))
     }
 
     stopAnimation(){
-        // debugger
-        // this.animate(performance.now()+1000/60);
-        console.log("what")
         cancelAnimationFrame(this.req);
     }
 
     continueAnimation(){
-        // debugger;
-        // this.animate(performance.now());
         this.game.bubbles = [];
         this.game.addBubbles();
         this.character.posX = 450;
@@ -547,7 +608,7 @@ class GameView {
     }
 
     animate(time) {
-        this.req = requestAnimationFrame(this.animate.bind(this))
+     this.req = requestAnimationFrame(this.animate.bind(this))
      this.timeDelta = time - this.lastTime;
      
      this.game.step();
@@ -577,7 +638,14 @@ class Timer {
     }
 
     draw(ctx){
-        ctx.font = "30px Comic Sans MS";
+        ctx.fillStyle = "lightgrey"
+        ctx.fillRect(830, 515, 90, 50);
+        ctx.fillStyle = "grey"
+        ctx.fillRect(833, 518, 84, 44);
+        ctx.fillStyle = "white"
+        ctx.fillRect(835,520, 80, 40);
+
+        ctx.font = "bold 25px Comic Sans MS";
         ctx.fillStyle = "black";
         ctx.fillText("Timer", 840, 550)
 

@@ -4,6 +4,9 @@ body {
 
 .game-name {
     font-family: Bath Time Regular;
+    text-align: center;
+    font-size: 40px;
+    color: yellow;;
 }
 
 .main-content{
@@ -13,11 +16,24 @@ body {
 
 .instructions {
     width:300px;
-    height: 500px;
+    height: 495px;
     float: left;
-    border: 1px solid red;
+    margin-right: 30px;
+    background: rgb(172, 171, 171);
+    border: 5px solid lightgray;
+}
+
+.instructions > h2 {
+    text-align: center;
 }
 
 canvas {
     float: left;
+}
+
+li {
+    margin-bottom: 10px;
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
 }
