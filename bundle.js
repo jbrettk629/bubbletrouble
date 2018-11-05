@@ -367,7 +367,7 @@ class Game{
 
     drawCeiling(ctx){
         let i = 0;
-        while (i <= 805){
+        while (i <= 800){
             ctx.beginPath();
             ctx.moveTo(i,0);
             ctx.lineTo(i+6,0);
@@ -376,6 +376,10 @@ class Game{
             ctx.fill();
             i += 6;
         }
+    }
+
+    drawBonus(){
+
     }
 
     gameOver(){
@@ -414,7 +418,6 @@ class Game{
 
             }
             if (this.character[0].isCollidedWith(bubble)){
-                // debugger;
                 this.gameOver();
             }
             
