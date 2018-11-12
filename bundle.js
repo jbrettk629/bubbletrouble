@@ -383,11 +383,10 @@ class Game{
     }
 
     gameOver(){
-        this.character[0].lives -= 1;
-        // debugger;
         this.stopAnimation();
         if (this.character[0].lives > 0){
             setTimeout(() => this.continueAnimation(), 1000);
+            this.character[0].lives -= 1;
         }
     }
 
@@ -397,12 +396,6 @@ class Game{
         }
     }
 
-    checkWon(){
-        if (this.bubbles.length === 0){
-            //display won, play again?
-        }
-    }
-    
     checkCollisions(){
         this.wire.forEach( wire => {
             if (wire.endPos[1] <= 0){
@@ -454,21 +447,12 @@ class Game{
 
         } else if (bubble.radius != 5) {
             let id = bubble.radius / 2;
-            let newBub1 = Object.assign(BUBBLES[id], {
-                x: posX,
-                y: posY,
-                vx: newVx
-            });
+            let newBub1 = Object.assign(BUBBLES[id], { x: posX, y: posY, vx: newVx });
             this.addBubbles(newBub1);
 
-            let newBub2 = Object.assign(BUBBLES[id], {
-                x: posX,
-                y: posY,
-                vx: newVx * -1
-            });
+            let newBub2 = Object.assign(BUBBLES[id], {x: posX, y: posY, vx: newVx * -1 });
             this.addBubbles(newBub2); 
         }
-
         this.removeBubble(bubble);
     }
     
@@ -482,18 +466,26 @@ class Game{
 
     checkBubbles(){
         if (this.bubbles.length === 0){
-            this.stopAnimation();
             this.addTimePoints();
         }
     }
 
     addTimePoints(){
-        // this.timer[0]
+        if (this.timer[0].timer < 1){
+            this.points += 10;
+            this.timer[0].timer += .001;
+        } else {
+            debugger
+            this.stopAnimation();
+            debugger;
+        }
     }
 
-    gameWon(){
-        this.stopAnimation();
-    }
+    // gameWon(){
+    //     this.addTimePoints(ctx);
+    //     this.stopAnimation();
+    // }
+
     displayPoints(ctx){
 
         ctx.fillStyle = "lightgrey"
@@ -592,6 +584,7 @@ class GameView {
     }
 
     stopAnimation(){
+        debugger;
         cancelAnimationFrame(this.req);
     }
 
@@ -614,7 +607,7 @@ class GameView {
      this.req = requestAnimationFrame(this.animate.bind(this))
      this.timeDelta = time - this.lastTime;
      
-     this.game.step();
+     this.game.step(this.ctx);
      this.game.draw(this.ctx);
      this.lastTime = time;
 
@@ -637,7 +630,6 @@ class Timer {
     constructor(){
         this.timer = 0
         this.on = true;
-        this.timeLeft = 1 - this.timer;
     }
 
     draw(ctx){
