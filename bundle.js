@@ -314,6 +314,8 @@ class Game{
         this.startTimer();
         this.lives = 5;
         this.points = 0
+        this.gameWon = false
+        this.over = false
     }
 
     startTimer(){
@@ -349,6 +351,7 @@ class Game{
             object.draw(ctx)
         })
         this.displayPoints(ctx);
+        this.gameOverModal(ctx);
     }
     
     drawborder(ctx){
@@ -382,20 +385,43 @@ class Game{
 
     }
 
+    
     gameOver(){
+        // debugger;
         this.stopAnimation();
-        if (this.character[0].lives > 0){
+        if (this.character[0].lives > 0 && !this.gameWon){
+            debugger;
             setTimeout(() => this.continueAnimation(), 1000);
             this.character[0].lives -= 1;
+        } else {
+            this.over = true
         }
     }
 
+    step(){
+        // debugger;
+        this.checkBubbles(); 
+        this.checkCollisions();
+        this.checkTimer();
+        // if (this.timer[0].outOfTime()){
+            //     debugger;
+            //     this.gameOver();  
+            // }
+    }
+        
+    checkBubbles(){
+        if (this.bubbles.length === 0){
+            this.addTimePoints();
+            this.gameWon = true;
+        }
+    }
+    
     checkTimer(){
         if (this.timer[0].outOfTime()){
             this.gameOver();
         }
     }
-
+        
     checkCollisions(){
         this.wire.forEach( wire => {
             if (wire.endPos[1] <= 0){
@@ -405,13 +431,13 @@ class Game{
         this.bubbles.forEach( bubble => {
             if (bubble.posY-bubble.radius <= 5){
                 let points = bubble.bonus
-          
+                
                 this.addPoints(points);
                 this.removeBubble(bubble);
-
+                
             }
-            if (this.character[0].isCollidedWith(bubble)){
-                this.gameOver();
+             if (this.character[0].isCollidedWith(bubble)){
+                 this.gameOver();
             }
             
             if (this.wire.length != 0 && this.wire[0].isCollidedWith(bubble)){
@@ -456,26 +482,13 @@ class Game{
         this.removeBubble(bubble);
     }
     
-    step(){
-        this.checkCollisions();
-        if (this.timer[0].outOfTime()){
-            this.gameOver();  
-        }
-        this.checkBubbles(); 
-    }
-
-    checkBubbles(){
-        if (this.bubbles.length === 0){
-            this.addTimePoints();
-        }
-    }
 
     addTimePoints(){
         if (this.timer[0].timer < 1){
             this.points += 10;
             this.timer[0].timer += .001;
         } else {
-            debugger
+            debugger;
             this.stopAnimation();
             debugger;
         }
@@ -541,6 +554,7 @@ class GameView {
         this.wire = this.game.wire[0];
         this.game.stopAnimation = this.stopAnimation.bind(this);
         this.game.continueAnimation = this.continueAnimation.bind(this);
+        this.game.gameOverModal = this.gameOverModal.bind(this);
     }
 
     
@@ -556,6 +570,35 @@ class GameView {
                 this.game.addWire();
                 break;
         }
+    }
+
+    gameOverModal(ctx){
+        if (this.game.over || this.gameWon){
+            ctx.fillStyle = "lightgrey";
+            ctx.fillRect(245, 145, 310, 210);
+            ctx.fillStyle = "grey";
+            ctx.fillRect(248, 148, 304, 204);
+            ctx.fillStyle = "white";
+            ctx.fillRect(250, 150, 300, 200);
+
+            ctx.font = "bold 40px Comic Sans MS";
+            ctx.fillStyle = "red";
+            if (this.game.gameWon){
+                ctx.fillText("You Won!", 300, 250)
+            } else {
+                ctx.fillText("Game Over", 300, 250)
+            }
+        }
+    }
+
+    replayButton(ctx){
+        ctx.fillStyle = "grey";
+        ctx.fillRect()
+    }
+
+    replay(){
+        this.game.lives = 5
+        this.continueAnimation();
     }
     
     load(){
@@ -584,7 +627,7 @@ class GameView {
     }
 
     stopAnimation(){
-        debugger;
+        // debugger;
         cancelAnimationFrame(this.req);
     }
 
