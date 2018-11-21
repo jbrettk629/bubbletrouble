@@ -320,6 +320,7 @@ class Game{
         this.level = 1;
         this.loadingLevel = false;
         this.levelWon = false;
+        this.hit = false;
     }
 
     startTimer(){
@@ -335,7 +336,11 @@ class Game{
             case 2:
                 this.addBubbles(Object.assign(BUBBLES[20], { x: 200, y: 200 }));
                 this.addBubbles(Object.assign(BUBBLES[20], { x: 600, y: 200 }));
-                break
+                break;
+            case 3:
+                this.addBubbles(Object.assign(BUBBLES[40], { x: 200, y: 200, vx: -1.5 }));
+                this.addBubbles(Object.assign(BUBBLES[40], { x: 600, y: 200 }));
+                break;
         }
     }
     
@@ -400,11 +405,12 @@ class Game{
     
     gameOver(){
         this.stopAnimation();
-        if (this.character[0].lives > 0 && !this.gameWon){
+        if (this.character[0].lives > 0 && this.hit){
             debugger;
             setTimeout(() => this.restartLevel(), 1000);
             this.character[0].lives -= 1;
         } else if (this.levelWon) {
+            debugger;
             this.nextLevel();
             this.levelWon = false;
         } else {
@@ -453,7 +459,9 @@ class Game{
                 this.removeBubble(bubble);
             }
              if (this.character[0].isCollidedWith(bubble)){
+                 this.hit = true;
                  this.gameOver();
+                 this.hit = false;
             }
             if (this.wire.length != 0 && this.wire[0].isCollidedWith(bubble)){
                 this.wire = [];
@@ -616,7 +624,7 @@ class GameView {
         addEventListener("keydown", this.move.bind(this, true), false);
         addEventListener("keyup", this.move.bind(this, false), false);
         
-        this.lastTime = 0;
+        // this.lastTime = 0;
         this.getReady(this.ctx);
     }
 
@@ -644,6 +652,7 @@ class GameView {
     }
 
     restartLevel(){
+        debugger;
         this.game.bubbles = [];
         this.game.setBubbles(this.game.level);
         // this.game.addBubbles();
