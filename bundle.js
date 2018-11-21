@@ -309,17 +309,34 @@ class Game{
         this.bubbles = [];
         this.character = [];
         this.wire = [];
-        this.addBubbles();
+        this.setBubbles(1)
+        // this.addBubbles();
         this.timer = [];
         this.startTimer();
         this.lives = 5;
-        this.points = 0
-        this.gameWon = false
-        this.over = false
+        this.points = 0;
+        this.gameWon = false;
+        this.over = false;
+        this.level = 1;
+        this.loadingLevel = false;
+        this.levelWon = false;
     }
 
     startTimer(){
         this.timer.push(new Timer);
+    }
+
+    setBubbles(level){
+        debugger;
+        switch(level){
+            case 1:
+                this.addBubbles(Object.assign(BUBBLES[20], {x: 200, y: 200}));
+                break;
+            case 2:
+                this.addBubbles(Object.assign(BUBBLES[20], { x: 200, y: 200 }));
+                this.addBubbles(Object.assign(BUBBLES[20], { x: 600, y: 200 }));
+                break
+        }
     }
     
     addBubbles(options = DEFAULT){
@@ -380,39 +397,36 @@ class Game{
             i += 6;
         }
     }
-
-    drawBonus(){
-
-    }
-
     
     gameOver(){
-        // debugger;
         this.stopAnimation();
         if (this.character[0].lives > 0 && !this.gameWon){
             debugger;
-            setTimeout(() => this.continueAnimation(), 1000);
+            setTimeout(() => this.restartLevel(), 1000);
             this.character[0].lives -= 1;
+        } else if (this.levelWon) {
+            this.nextLevel();
+            this.levelWon = false;
         } else {
             this.over = true
         }
     }
 
     step(){
-        // debugger;
         this.checkBubbles(); 
         this.checkCollisions();
         this.checkTimer();
-        // if (this.timer[0].outOfTime()){
-            //     debugger;
-            //     this.gameOver();  
-            // }
+ 
     }
         
     checkBubbles(){
         if (this.bubbles.length === 0){
+            if (this.levelWon === false){
+                this.addLevel();
+                this.levelWon = true;
+            }
+            // this.gameWon = true;
             this.addTimePoints();
-            this.gameWon = true;
         }
     }
     
@@ -420,6 +434,10 @@ class Game{
         if (this.timer[0].outOfTime()){
             this.gameOver();
         }
+    }
+
+    addLevel(){
+        this.level += 1;
     }
         
     checkCollisions(){
@@ -430,16 +448,13 @@ class Game{
         })
         this.bubbles.forEach( bubble => {
             if (bubble.posY-bubble.radius <= 5){
-                let points = bubble.bonus
-                
+                let points = bubble.bonus    
                 this.addPoints(points);
                 this.removeBubble(bubble);
-                
             }
              if (this.character[0].isCollidedWith(bubble)){
                  this.gameOver();
             }
-            
             if (this.wire.length != 0 && this.wire[0].isCollidedWith(bubble)){
                 this.wire = [];
                 this.hitBubble(bubble);
@@ -490,14 +505,9 @@ class Game{
         } else {
             debugger;
             this.stopAnimation();
-            debugger;
+            this.nextLevel();
         }
     }
-
-    // gameWon(){
-    //     this.addTimePoints(ctx);
-    //     this.stopAnimation();
-    // }
 
     displayPoints(ctx){
 
@@ -553,7 +563,8 @@ class GameView {
         this.character = this.game.character[0];
         this.wire = this.game.wire[0];
         this.game.stopAnimation = this.stopAnimation.bind(this);
-        this.game.continueAnimation = this.continueAnimation.bind(this);
+        this.game.restartLevel = this.restartLevel.bind(this);
+        this.game.nextLevel = this.nextLevel.bind(this);
         this.game.gameOverModal = this.gameOverModal.bind(this);
     }
 
@@ -573,7 +584,7 @@ class GameView {
     }
 
     gameOverModal(ctx){
-        if (this.game.over || this.gameWon){
+        if (this.game.over || this.game.gameWon){
             ctx.fillStyle = "lightgrey";
             ctx.fillRect(245, 145, 310, 210);
             ctx.fillStyle = "grey";
@@ -591,15 +602,15 @@ class GameView {
         }
     }
 
-    replayButton(ctx){
-        ctx.fillStyle = "grey";
-        ctx.fillRect()
-    }
+    // replayButton(ctx){
+    //     ctx.fillStyle = "grey";
+    //     ctx.fillRect()
+    // }
 
-    replay(){
-        this.game.lives = 5
-        this.continueAnimation();
-    }
+    // replay(){
+    //     this.game.lives = 5
+    //     this.continueAnimation();
+    // }
     
     load(){
         addEventListener("keydown", this.move.bind(this, true), false);
@@ -619,6 +630,8 @@ class GameView {
         ctx.font = "30px Comic Sans MS";
         ctx.fillStyle = "black";
         ctx.fillText("Get Ready", 325, 250)
+        ctx.fillStyle = "black";
+        ctx.fillText(`Level ${this.game.level}`, 350, 300)
         setTimeout(() => this.startAnimation(), 3500)
     }
     
@@ -627,32 +640,39 @@ class GameView {
     }
 
     stopAnimation(){
-        // debugger;
         cancelAnimationFrame(this.req);
     }
 
-    continueAnimation(){
+    restartLevel(){
         this.game.bubbles = [];
-        this.game.addBubbles();
-        this.character.posX = 450;
+        this.game.setBubbles(this.game.level);
+        // this.game.addBubbles();
+        this.character.posX = 350;
         this.character.posY = 450;
         this.game.timer = [];
         this.game.startTimer();
         this.game.points = 0;
         this.game.wire = [];
 
-        this.lastTime = performance.now();
+        // this.lastTime = performance.now();
         this.getReady(this.ctx);
+    }
 
+    nextLevel(){
+        this.game.setBubbles(this.game.level);
+        this.character.posX = 350;
+        this.character.posY = 450;
+        this.game.timer = [];
+        this.game.startTimer();
+        this.getReady(this.ctx);
     }
 
     animate(time) {
      this.req = requestAnimationFrame(this.animate.bind(this))
-     this.timeDelta = time - this.lastTime;
      
      this.game.step(this.ctx);
      this.game.draw(this.ctx);
-     this.lastTime = time;
+    //  this.lastTime = time;
 
     }
 }
