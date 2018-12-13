@@ -171,6 +171,7 @@ const Game = __webpack_require__(/*! ./game */ "./lib/game.js");
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    document.getElementById("canvas").style.visibility = "hidden";
     const canvasEl = document.getElementById("canvas");
     const ctx = canvasEl.getContext('2d');
     const game = new Game();

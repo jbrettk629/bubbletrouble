@@ -29,6 +29,7 @@ body {
 
 canvas {
     float: left;
+    /* display: none; */
 }
 
 li {
