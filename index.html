@@ -21,17 +21,17 @@
 
             <div id="gameview">
                 <div id="StartScreen">
-                    <h1>Let's get this started</h1>
                     <button onclick="startgame()">Start Game</button>
                 </div>
-
-                <canvas width=1000 height=600 id="canvas" display="none"></canvas>
+                <canvas width=1000 height=600 id="canvas"></canvas>
+                
             </div>
 
 
             <script>
                 function startgame() {
-                    document.getElementById("canvas").style.visibility = "visible"
+                    const canvasEl = document.getElementById("canvas");
+                    canvasEl.style.visibility = "visible"
                 }
             </script>
 
