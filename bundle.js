@@ -172,9 +172,7 @@ const Game = __webpack_require__(/*! ./game */ "./lib/game.js");
 document.addEventListener("DOMContentLoaded", () => {
 
     const canvasEl = document.getElementById("canvas");
-
     const ctx = canvasEl.getContext('2d');
-
     const game = new Game();
     new GameView(game, ctx).load();
 
@@ -520,11 +518,11 @@ class Game{
     displayPoints(ctx){
 
         ctx.fillStyle = "lightgrey"
-        ctx.fillRect(240, 515, 90, 50);
+        ctx.fillRect(240, 515, 110, 50);
         ctx.fillStyle = "grey"
-        ctx.fillRect(243, 518, 84, 44);
+        ctx.fillRect(243, 518, 104, 44);
         ctx.fillStyle = "white"
-        ctx.fillRect(245, 520, 80, 40);
+        ctx.fillRect(245, 520, 100, 40);
 
         ctx.font = "bold 25px Comic Sans MS";
         ctx.fillStyle = "red";
@@ -663,7 +661,6 @@ class GameView {
         this.game.startTimer();
         this.game.points = 0;
         this.game.wire = [];
-
         // this.lastTime = performance.now();
         this.getReady(this.ctx);
     }
