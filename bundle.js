@@ -326,7 +326,6 @@ class Game{
         this.character = [];
         this.wire = [];
         this.setBubbles(1)
-        // this.addBubbles();
         this.timer = [];
         this.startTimer();
         this.lives = 5;
@@ -420,17 +419,27 @@ class Game{
     }
     
     gameOver(){
+        console.log("game over")
         this.stopAnimation();
         if (this.character[0].lives > 0 && this.hit){
+            console.log("game over - restart level")
             this.points = this.startingPoints
             setTimeout(() => this.restartLevel(), 1000);
             this.character[0].lives -= 1;
         } else if (this.levelWon) {
-            this.startingPoints = this.points
-            console.log(this.level)
-            this.nextLevel();
+            this.addLevel()
+            if (this.level === 4){
+                console.log("game over - game won")
+                this.gameWon = true
+            } else {
+                console.log("game over - next level")
+                this.startingPoints = this.points
+                console.log(this.level)
+                this.nextLevel();
+            }
             this.levelWon = false;
         } else {
+            console.log("game over - game over")
             this.over = true
         }
     }
@@ -445,7 +454,6 @@ class Game{
     checkBubbles(){
         if (this.bubbles.length === 0){
             if (this.levelWon === false){
-                this.addLevel();
                 this.levelWon = true;
             }
             // this.gameWon = true;
@@ -639,12 +647,12 @@ class GameView {
         addEventListener("keydown", this.move.bind(this, true), false);
         addEventListener("keyup", this.move.bind(this, false), false);
         
-        // this.lastTime = 0;
+        console.log("load game")
         this.getReady(this.ctx);
     }
 
     getReady(ctx){
-        // debugger;
+        console.log("get ready")
         this.game.draw(this.ctx);
 
         
@@ -668,7 +676,7 @@ class GameView {
     }
 
     restartLevel(){
-        // debugger;
+        console.log("restart level")
         this.game.bubbles = [];
         this.game.setBubbles(this.game.level);
         // this.game.addBubbles();
@@ -683,6 +691,7 @@ class GameView {
     }
 
     nextLevel(){
+        console.log("next level")
         this.game.setBubbles(this.game.level);
         this.character.posX = 350;
         this.character.posY = 450;
