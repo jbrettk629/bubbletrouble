@@ -169,15 +169,31 @@ module.exports = Bubble;
 const GameView = __webpack_require__(/*! ./game_view */ "./lib/game_view.js");
 const Game = __webpack_require__(/*! ./game */ "./lib/game.js");
 
-document.addEventListener("DOMContentLoaded", () => {
 
+document.addEventListener("DOMContentLoaded", () => {
+    const button = document.getElementById("startButton");
     document.getElementById("canvas").style.visibility = "hidden";
+
+    button.addEventListener("click", startGame)
+})
+
+
+
+function startGame() { 
+    const button = document.getElementById("startButton");
+    button.removeEventListener("click", startGame)
+    button.style.display = "none";
+     
     const canvasEl = document.getElementById("canvas");
+    
     ctx = canvasEl.getContext('2d');
     game = new Game();
+    console.log("hello");
     new GameView(game, ctx).load();
+    
+    canvasEl.style.visibility = "visible"
+}
 
-})
 
 
 
@@ -328,7 +344,7 @@ class Game{
     }
 
     setBubbles(level){
-        debugger;
+     
         switch(level){
             case 1:
                 this.addBubbles(Object.assign(BUBBLES[20], {x: 200, y: 200}));
@@ -406,11 +422,11 @@ class Game{
     gameOver(){
         this.stopAnimation();
         if (this.character[0].lives > 0 && this.hit){
-            debugger;
+           
             setTimeout(() => this.restartLevel(), 1000);
             this.character[0].lives -= 1;
         } else if (this.levelWon) {
-            debugger;
+  
             this.nextLevel();
             this.levelWon = false;
         } else {
@@ -511,7 +527,7 @@ class Game{
             this.points += 10;
             this.timer[0].timer += .001;
         } else {
-            debugger;
+          
             this.stopAnimation();
             this.nextLevel();
         }
@@ -629,7 +645,7 @@ class GameView {
     }
 
     getReady(ctx){
-        debugger;
+        // debugger;
         this.game.draw(this.ctx);
 
         
@@ -653,7 +669,7 @@ class GameView {
     }
 
     restartLevel(){
-        debugger;
+        // debugger;
         this.game.bubbles = [];
         this.game.setBubbles(this.game.level);
         // this.game.addBubbles();
