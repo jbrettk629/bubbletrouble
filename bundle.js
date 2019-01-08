@@ -102,6 +102,8 @@ class Bubble {
         this.posY = options.y;
         this.radius = options.radius;
         this.color = options.color;
+        this.points = options.points;
+        this.bonus = options.bonus
         this.startingVy = options.startVy;
         this.defaultVy = options.vy;
         this.vx = options.vx || 1.5;
@@ -109,8 +111,6 @@ class Bubble {
         this.bounceFactor = 1;
         this.gravity = options.gravity || 0.12;
         this.count = 0
-        this.points = options.points;
-        this.bonus = options.bonus
     }
 
     draw(ctx){
@@ -184,11 +184,10 @@ function startGame() {
     button.removeEventListener("click", startGame)
     button.style.display = "none";
      
-    const canvasEl = document.getElementById("canvas");
-    
+    const canvasEl = document.getElementById("canvas"); 
     ctx = canvasEl.getContext('2d');
+    
     game = new Game();
-    console.log("hello");
     new GameView(game, ctx).load();
     
     canvasEl.style.visibility = "visible"
@@ -237,29 +236,21 @@ class Character {
         const ly = this.posY;
 
         //checks for colission with the top of the player
-        if ((bcy + rad) >= ry && bcx >= rx && bcx <= lx){
-            // this.loseLife();
+        if ((bcy + rad) >= ry && bcx >= rx && bcx <= lx){   
             return true;
              }
         //checks for collision with the right of the player
         if (bcx + rad >= rx && bcx + rad <= lx && bcy >= ry) {
-            // this.loseLife();
             return true;
         }
         //checks for collision with the left of the player
         if (bcx - rad >= rx && bcx - rad <= lx && bcy >= ly) {
-            // this.loseLife();
             return true;
         }
         // checks for collision with the corners of the playerc
         if ((Math.sqrt((bcx - rx) ** 2 + (bcy - ry) ** 2) <= rad) || (Math.sqrt((bcx - lx) ** 2 + (bcy - ly) ** 2) <= rad)){
-            // this.loseLife();
             return true;
         }
-    }
-
-    loseLife(){
-        this.lives -= 1;
     }
 
     displayLives(ctx){
@@ -357,6 +348,9 @@ class Game{
                 this.addBubbles(Object.assign(BUBBLES[40], { x: 200, y: 200, vx: -1.5 }));
                 this.addBubbles(Object.assign(BUBBLES[40], { x: 600, y: 200 }));
                 break;
+            case 4: 
+                this.addBubbles(Object.assign(BUBBLES[70], { x: 200, y: 200 }));
+                break;
         }
     }
     
@@ -419,27 +413,21 @@ class Game{
     }
     
     gameOver(){
-        console.log("game over")
         this.stopAnimation();
         if (this.character[0].lives > 0 && this.hit){
-            console.log("game over - restart level")
             this.points = this.startingPoints
             setTimeout(() => this.restartLevel(), 1000);
             this.character[0].lives -= 1;
         } else if (this.levelWon) {
             this.addLevel()
-            if (this.level === 4){
-                console.log("game over - game won")
+            if (this.level === 5){
                 this.gameWon = true
             } else {
-                console.log("game over - next level")
                 this.startingPoints = this.points
-                console.log(this.level)
                 setTimeout(() => this.nextLevel(), 1000);
             }
             this.levelWon = false;
         } else {
-            console.log("game over - game over")
             this.over = true
         }
     }
@@ -782,10 +770,7 @@ class Wire {
         this.vy = -4.5
     }
 
-
-
     draw(ctx){
-        // debugger;
         ctx.beginPath();
         ctx.moveTo(this.startPos[0], this.startPos[1]);
         ctx.lineTo(this.endPos[0], this.endPos[1])
