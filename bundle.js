@@ -435,7 +435,7 @@ class Game{
                 console.log("game over - next level")
                 this.startingPoints = this.points
                 console.log(this.level)
-                this.nextLevel();
+                setTimeout(() => this.nextLevel(), 1000);
             }
             this.levelWon = false;
         } else {
@@ -664,6 +664,7 @@ class GameView {
         ctx.fillText("Get Ready", 325, 250)
         ctx.fillStyle = "black";
         ctx.fillText(`Level ${this.game.level}`, 350, 300);
+        debugger
         setTimeout(() => this.startAnimation(), 3500)
     }
     
@@ -679,14 +680,12 @@ class GameView {
         console.log("restart level")
         this.game.bubbles = [];
         this.game.setBubbles(this.game.level);
-        // this.game.addBubbles();
         this.character.posX = 350;
         this.character.posY = 450;
         this.game.timer = [];
         this.game.startTimer();
         this.game.points = this.game.startingPoints;
         this.game.wire = [];
-        // this.lastTime = performance.now();
         this.getReady(this.ctx);
     }
 
@@ -700,13 +699,10 @@ class GameView {
         this.getReady(this.ctx);
     }
 
-    animate(time) {
+    animate() {
      this.req = requestAnimationFrame(this.animate.bind(this))
-     
      this.game.step(this.ctx);
      this.game.draw(this.ctx);
-    //  this.lastTime = time;
-
     }
 }
 
